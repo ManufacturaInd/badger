@@ -9,7 +9,7 @@ import sys, os
 import click
 from PIL import Image, ImageFont, ImageDraw
 
-FONT_DIR = "./pil-fonts/"
+FONT_DIR = os.path.expanduser("~/.badger/pil-fonts/")
 
 def list_fonts(ctx, value):
     if not value:
@@ -85,7 +85,11 @@ def txt2img(filename, font, leading, tracking, bgcolor, textcolor, width, figlet
     # this beautiful line came from http://stackoverflow.com/a/873333
     max_chars = max(lines, key=len)
     # now determine image size
-    width, line_height = font.getsize(max_chars)
+    try:
+        width, line_height = font.getsize(max_chars)
+    except TypeError:
+        print "Error with file %s. Traceback follows." % filename
+        raise
     height = line_height*len(lines) + int(tracking)*len(lines)
     if bgcolor:
         image = Image.new("RGBA", (width, height), color=bgcolor)
@@ -105,8 +109,7 @@ def txt2img(filename, font, leading, tracking, bgcolor, textcolor, width, figlet
                 char_count += 1
         i += fh + int(leading)
 
-    # too lazy to go read the docs now, i just want the base filename
-    outfilename = "%s.png" % os.path.basename(filename).split('.')[0]
+    outfilename = "%s.png" % os.path.splitext(filename)[0]
     # if the input file is a png, don't overwrite and save with a different name
     if os.path.exists(outfilename) and os.path.splitext(filename)[1] == '.png':
         outfilename = os.path.splitext(outfilename)[0] + '_output.png'
