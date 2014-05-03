@@ -4,8 +4,7 @@ badger
 Badger is a simple text to image converter, designed to render ASCII art using bitmap fonts.
 
 It uses [Pillow][1], the friendly PIL fork, to draw PNG images using a bitmap font in the .pil
-format. Formats like BDF or PCF can be converted to the PIL font format using the ``pilfont.py``
-script that comes with Pillow.
+format. See below how to convert other font formats to .pil.
 
 Installation
 ------------
@@ -18,7 +17,8 @@ Usage
 -----
 
 ```
-Usage: badger [OPTIONS] TEXTFILE
+# badger --help
+Usage: badger [OPTIONS] FILENAME
 
 Options:
   -f FONT, --font=FONT  Font name to use. Use -l for a list. (default: 4x6)
@@ -30,27 +30,38 @@ Options:
                         Text color.
   -b BGCOLOR, --bgcolor=BGCOLOR
                         Background color.
+  -w WIDTH, --width=WIDTH
+                        Width in characters when converting images.
   -l, --list-fonts      Show available fonts and exit.
   --help                Show this message and exit.
 ```
 
 Here's an example:
 
-    badger bbs.txt --font 5x8 --leading=-1 --tracking=-1 --textcolor="#dddddd" --bgcolor="#222222"
+    badger gnu.txt --font 5x8 --leading=-1 --tracking=-1 --textcolor="#dddddd" --bgcolor="#222222"
     
 ...which is the same as typing:
 
-    badger bbs.txt -f 5x8 -e -1 -r -1 -t "#dddddd" -b "#222222"
+    badger gnu.txt -f 5x8 -e -1 -r -1 -t #ddd -b #222
+
+Note that you can use negative leading or tracking values, and specify colors by name instead of hex values (e.g. `white` or `cyan`).
+
+Badger also works with images instead of text files, taking care of the conversion for you thanks to **jp2a** and **Imagemagick**.
+
+    badger gavroche.png -f 10x20 --width 40
+
 
 Fonts you can use
 -----------------
 
-Bitmap fonts aren't as popular now that OpenType rules modern digital typography.
+Bitmap font formats like BDF or PCF can be converted to the PIL font format using the ``pilfont.py``
+script that comes with Pillow.
 
-There's still some good libre bitmap fonts around:
+There's some good libre bitmap fonts around, we could certainly do with a bigger list:
 
 * The [X11 fonts][2]
 * [PXL-2000][3]
+
 
 License
 -------
