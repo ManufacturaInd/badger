@@ -104,8 +104,14 @@ def txt2img(filename, font, leading, tracking, bgcolor, textcolor, width, figlet
                 draw.text((char_count*(fw+int(tracking)), i), char, font=font, fill=textcolor)
                 char_count += 1
         i += fh + int(leading)
+
+    # too lazy to go read the docs now, i just want the base filename
+    outfilename = "%s.png" % os.path.basename(filename).split('.')[0]
+    # if the input file is a png, don't overwrite and save with a different name
+    if os.path.exists(outfilename) and os.path.splitext(filename)[1] == '.png':
+        outfilename = os.path.splitext(outfilename)[0] + '_output.png'
     try:
-        image.save("result.png")
+        image.save(outfilename)
     except SystemError:
         print "Failed while trying to save image with dimensions %dx%d. Traceback follows." % (width, height)
         print
