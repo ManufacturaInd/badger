@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
 # TODO
-# - add conversion to txt with jp2a
-# - add another mode to generate figlet specimen
-# - check if jp2a is installed
-# - write simple README on usage
-# - add GPL3
-# - push to Github
+# - implement figlet import
+# - generate a full specimen of available bitmap fonts
+# - the same with figlet fonts
 
+import sys, os
 import click
+from PIL import Image, ImageFont, ImageDraw
 
-TXT_FILE = "stardark.txt"
-FONT = "./pil-fonts/4x6.pil"
-OFFSET = 8
 FONT_DIR = "./pil-fonts/"
 
 def list_fonts(ctx, value):
@@ -22,7 +18,7 @@ def list_fonts(ctx, value):
     file_list = glob.glob(os.path.join(FONT_DIR, "*.pil"))
     file_list.sort()
     from pprint import pprint
-    print "Available fonts:"
+    print "Available bitmap fonts:"
     for f in file_list:
         file_name = os.path.basename(f)
         font_name = file_name.split('.')[0]
@@ -30,37 +26,73 @@ def list_fonts(ctx, value):
     print
     ctx.exit()
 
+def list_figlet_fonts(ctx, value):
+    pass
+
 @click.command()
-@click.argument("textfile")
-@click.option('-f', '--font', default="4x6", help='Font name to use. Use -l for a list. (default: 4x6)', required=False)
+@click.argument("filename")
+@click.option('-f', '--font', default="4x6", help='Font name to use. Use -l for a list. (default: 4x6)')
 @click.option('-e', '--leading', default="0", help='Extra spacing between lines. (default: 0)', type=click.INT)
 @click.option('-r', '--tracking', default="0", help='Extra spacing between characters. (default: 0)', type=click.INT)
-@click.option('-t', '--textcolor', default="#000000", help='Text color.', required=False)
-@click.option('-b', '--bgcolor', default="#ffffff", help='Background color.', required=False)
+@click.option('-t', '--textcolor', default="#000000", help='Text color.')
+@click.option('-b', '--bgcolor', default="", help='Background color.')
+@click.option('-w', '--width', default="80", help='Width in characters when converting images.', type=click.INT)
+@click.option('-F', '--figlet', default=None, help='[not implemented] Render a string with figlet.')
+@click.option('-T', '--figlet-font', default='shimrod', help='[not implemented] Figlet font to use. (only used with -F)')
 @click.option('-l', '--list-fonts', is_flag=True, help='Show available fonts and exit.', callback=list_fonts,
               expose_value=False, is_eager=True)
-def txt2img(textfile, font, offset=8, leading=0, tracking=0, size=(640, 480), bgcolor="#ffffff", textcolor="#000000"):
-    from PIL import Image, ImageFont, ImageDraw
-    fontpath = "./pil-fonts/%s.pil" % font
+@click.option('-L', '--list-figlet-fonts', is_flag=True, help='Show available Figlet fonts and exit.', callback=list_figlet_fonts,
+              expose_value=False, is_eager=True)
+def txt2img(filename, font, leading, tracking, bgcolor, textcolor, width, figlet, figlet_font):
+    # load the font
+    fontpath = os.path.join(FONT_DIR, "%s.pil" % font)
     font = ImageFont.load(fontpath)
-    text = open(textfile, 'r')
-    lines = text.readlines()
+
+    # is the source file an image? If so, convert to text first
+    import magic
+    from subprocess import Popen, call, check_output, PIPE
+    mimetype = magic.from_file(filename, mime=True)
+    if mimetype.startswith('image'):
+        # test for jp2a
+        if call(['jp2a', '--version']):
+            print "You don't seem to have jp2a installed. On Debian systems, try 'sudo aptitude install jp2a'."
+            print "You can still run badger on text files, but I need jp2a to be able to convert images."
+            print call(['jp2a', '--version'])
+            sys.exit()
+        if not mimetype[-3:] in ('jpg', 'jpeg'):
+            # test for imagemagick
+            if call(['convert', ' -version']):
+                print "You don't seem to have ImageMagick installed. On Debian systems, try 'sudo aptitude install imagemagick'."
+                print "I can work without it, as long as you feed me JPEG files."
+                sys.exit()
+            # jp2a needs a jpeg file, use convert and go
+            text = Popen('convert %s jpg:- | jp2a - --width=%d' % (filename, width),
+                            shell=True, stdout=PIPE).communicate()[0]
+        else:
+            # we got a jpeg, this is easy
+            text = Popen('jp2a %s --width=%d' % (filename, width), 
+                            shell=True, stdout=PIPE).communicate()[0]
+        lines = text.split('\n')
+    else:
+        # not an image, let's read it as a text file since possible extensions are plenty
+        text = open(filename, 'r')
+        lines = text.readlines()
 
     # determine font sizes
     fw, fh = font.getsize('M')
-    # get total text size for canvas sizing
-    # w, h = font.getsize(content)
-    # print w,h
     
     # find longest line to determine width
-    l = max(lines, key=len)
-    # this beautiful snippet came from http://stackoverflow.com/a/873333
-
-    width, line_height = font.getsize(l)
+    # this beautiful line came from http://stackoverflow.com/a/873333
+    max_chars = max(lines, key=len)
+    # now determine image size
+    width, line_height = font.getsize(max_chars)
     height = line_height*len(lines) + int(tracking)*len(lines)
-
-    image = Image.new("RGBA", (width, height), color=bgcolor)
+    if bgcolor:
+        image = Image.new("RGBA", (width, height), color=bgcolor)
+    else:
+        image = Image.new("RGBA", (width, height))
     draw = ImageDraw.Draw(image)
+
     i = 0
     for line in lines:
         if not tracking:
