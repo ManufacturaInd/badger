@@ -53,14 +53,17 @@ def txt2img(outfilename, filename, font, leading, tracking, bgcolor, textcolor, 
     mimetype = magic.from_file(filename, mime=True)
     if mimetype.startswith('image'):
         # test for jp2a
-        if call(['jp2a', '--version']):
+        try:
+            call(['jp2a', '--version'])
+        except OSError:
             print "You don't seem to have jp2a installed. On Debian systems, try 'sudo aptitude install jp2a'."
             print "You can still run badger on text files, but I need jp2a to be able to convert images."
-            print call(['jp2a', '--version'])
             sys.exit()
         if not mimetype[-3:] in ('jpg', 'jpeg'):
             # test for imagemagick
-            if call(['convert', ' -version']):
+            try:
+                call(['convert', ' -version'])
+            except OSError:
                 print "You don't seem to have ImageMagick installed. On Debian systems, try 'sudo aptitude install imagemagick'."
                 print "I can work without it, as long as you feed me JPEG files."
                 sys.exit()
