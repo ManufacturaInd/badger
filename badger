@@ -102,7 +102,7 @@ def txt2img(outfilename, filename, font, leading, tracking, bgcolor, textcolor, 
     i = 0
     for line in lines:
         if not tracking:
-            draw.text((10, i), line, font=font, fill=textcolor)
+            draw.text((0, i), line, font=font, fill=textcolor)
         else:
             # applying tracking requires char by char output
             char_count = 0
