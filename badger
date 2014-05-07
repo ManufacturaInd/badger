@@ -92,7 +92,7 @@ def txt2img(outfilename, filename, font, leading, tracking, bgcolor, textcolor, 
     except TypeError:
         print "Error with file %s. Traceback follows." % filename
         raise
-    height = line_height*len(lines) + int(tracking)*len(lines)
+    height = line_height*len(lines) + max(0,int(leading))*len(lines)
     if bgcolor:
         image = Image.new("RGBA", (width, height), color=bgcolor)
     else:
