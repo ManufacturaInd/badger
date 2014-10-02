@@ -61,6 +61,15 @@ There's some good libre bitmap fonts around, we could certainly do with a bigger
 
 * The [X11 fonts][2]
 * [PXL-2000][3]
+ 
+
+ASCII Art resources
+-------------------
+
+Some Internet history archives took care of preserving this once-vibrant form of expression.
+
+  * [TextFiles.com](http://www.textfiles.com)
+  * [Chris.com ASCII Art Collection](http://www.chris.com/ascii/)
 
 
 License
