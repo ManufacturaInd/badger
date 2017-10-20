@@ -55,7 +55,7 @@ Fonts you can use
 -----------------
 
 Bitmap font formats like BDF or PCF can be converted to the PIL font format using the ``pilfont.py``
-script that comes with Pillow.
+script that comes with Pillow; it should be ready to use in your shell by typing `pilfont` or `pilfont.py`.
 
 There's some good libre bitmap fonts around, we could certainly do with a bigger list:
 
