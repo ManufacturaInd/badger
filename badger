@@ -45,7 +45,12 @@ def list_figlet_fonts(ctx, value):
 def txt2img(outfilename, filename, font, leading, tracking, bgcolor, textcolor, width, figlet, figlet_font):
     # load the font
     fontpath = os.path.join(FONT_DIR, "%s.pil" % font)
-    font = ImageFont.load(fontpath)
+    try:
+        font = ImageFont.load(fontpath)
+    except (IOError, OSError) as err:
+        print("Could not find or use the font " + font + " (after looking for it at " + fontpath + " ).")
+        print("The actual error was: " + format(err))
+        sys.exit()
 
     # is the source file an image? If so, convert to text first
     import magic
