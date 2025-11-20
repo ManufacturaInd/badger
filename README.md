@@ -1,6 +1,8 @@
 badger
 ======
 
+**Warning: This repository is archived and will not be updated further. The most recent developments can be found at <https://gitlab.com/manufacturaind/badger>. Any issues and pull requests submitted on GitHub won't be acknowledged.**
+
 Badger is a simple text to image converter, designed to render ASCII art using bitmap fonts.
 
 It uses [Pillow][1], the friendly PIL fork, to draw PNG images using a bitmap font in the .pil
